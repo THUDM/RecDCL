@@ -1,0 +1,15 @@
+embedding_size: 2048
+encoder: LightGCN
+n_layers: 2
+training_neg_sample_num: 0
+bt_coeff: 0.005
+warm_up: 10000
+gamma: 2
+a: 1
+degree: 4
+polyc: 1e-7
+bt_cof: 1
+uniform_cof: 0
+sim_coeff: 25
+std_coeff: 25
+cov_coeff: 1
