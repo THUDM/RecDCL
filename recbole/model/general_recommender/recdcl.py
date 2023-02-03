@@ -14,11 +14,11 @@ from recbole.utils import InputType
 import faiss
 
 
-class BT4Rec(GeneralRecommender):
+class RecDCL(GeneralRecommender):
     input_type = InputType.POINTWISE
 
     def __init__(self, config, dataset):
-        super(BT4Rec, self).__init__(config, dataset)
+        super(RecDCL, self).__init__(config, dataset)
 
         # load parameters info
         self.batch_size = config['train_batch_size']
