@@ -14,7 +14,7 @@ from recbole.quick_start import run_recbole
 
 
 if __name__ == '__main__':
-    wandb.login(key="ed022f13b9f1b9e155450b10e06c563b40452b07")
+    wandb.login(key="")
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', '-m', type=str, default='BPR', help='name of models')
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     args, _ = parser.parse_known_args()
     wandb.init(
-        name='65-' + args.dataset + '-' + args.model,
+        name='exp-' + args.dataset + '-' + args.model,
         project="SSL4Rec")
     config_file_list = args.config_files.strip().split(' ') if args.config_files else None
     run_recbole(model=args.model, dataset=args.dataset, config_file_list=config_file_list)
