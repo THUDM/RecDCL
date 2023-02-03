@@ -11,6 +11,7 @@ from torchmetrics.functional import pairwise_cosine_similarity
 from recbole.model.abstract_recommender import GeneralRecommender
 from recbole.model.init import xavier_normal_initialization
 from recbole.utils import InputType
+import faiss
 
 
 class BT4Rec(GeneralRecommender):
@@ -22,15 +23,18 @@ class BT4Rec(GeneralRecommender):
         # load parameters info
         self.batch_size = config['train_batch_size']
         self.embedding_size = config['embedding_size']
-        self.gamma = config['gamma']
+
         self.encoder_name = config['encoder']
         self.reg_weight = config['reg_weight']
+       
         self.a = config['a']
         self.polyc = config['polyc']
         self.degree = config['degree']
+        self.poly_coeff = config['poly_coeff']
         self.bt_coeff = config['bt_coeff']
-        self.warm_up = config['warm_up']
-        self.uniform_cof = config['uniform_cof']
+        self.all_bt_coeff = config['all_bt_coeff']
+        self.mom_coeff = config['mom_coeff']
+        self.momentum = config['momentum']
 
         # define layers and loss
         if self.encoder_name == 'MF':
@@ -62,6 +66,11 @@ class BT4Rec(GeneralRecommender):
         # parameters initialization
         self.apply(xavier_normal_initialization)
 
+        self.predictor = nn.Linear(self.embedding_size, self.embedding_size)
+
+        self.u_target_his = torch.randn((self.n_users, self.embedding_size), requires_grad=False).to(self.device)
+        self.i_target_his = torch.randn((self.n_items, self.embedding_size), requires_grad=False).to(self.device)
+
     def get_norm_adj_mat(self):
         # build adj matrix
         A = sp.dok_matrix((self.n_users + self.n_items, self.n_users + self.n_items), dtype=np.float32)
@@ -87,16 +96,20 @@ class BT4Rec(GeneralRecommender):
         return SparseL
 
     def forward(self, user, item):
-        user_e, item_e = self.encoder(user, item)
-        return F.normalize(user_e, dim=-1), F.normalize(item_e, dim=-1)
+        user_e, item_e, lightgcn_all_embeddings = self.encoder(user, item)
 
-    @staticmethod
-    def alignment(x, y, alpha=2):
-        return (x - y).norm(p=2, dim=1).pow(alpha).mean()
+        with torch.no_grad():
+            u_target, i_target = self.u_target_his.clone()[user, :], self.i_target_his.clone()[item, :]
+            u_target.detach()
+            i_target.detach()
 
-    # @staticmethod
-    def uniformity(self, input, t=2):
-        return torch.pdist(input, p=2).pow(2).mul(-t).exp().mean().log()
+            u_target = u_target * self.momentum + user_e.data * (1. - self.momentum)
+            i_target = i_target * self.momentum + item_e.data * (1. - self.momentum)
+
+            self.u_target_his[user, :] = user_e.clone()
+            self.i_target_his[item, :] = item_e.clone()
+            
+        return user_e, item_e, lightgcn_all_embeddings, u_target, i_target
 
     @staticmethod
     def off_diagonal(x):
@@ -105,26 +118,6 @@ class BT4Rec(GeneralRecommender):
         assert n == m
         return x.flatten()[:-1].view(n - 1, n + 1)[:, 1:].flatten()
     
-    @staticmethod
-    def eigh_batch(x, t=2, eps=1e-3):
-        f = (x.shape[0] - 1) / x.shape[0]      # 方差调整系数
-        x_reducemean = x - torch.mean(x, axis=0)
-        numerator = torch.matmul(x_reducemean.T, x_reducemean) / x.shape[0]
-        var_ = x.var(axis=0).reshape(x.shape[1], 1)
-        denominator = torch.sqrt(torch.matmul(var_, var_.T)) * f
-        xx = numerator / denominator
-        # return eigenvalues and eigenvectors of x
-        # xx1 = xx.pow(2).mul(-2).exp()
-        vals = torch.linalg.eigvalsh(xx)
-        # return -vals[vals > eps].log().sum()
-        return vals[vals > eps].log().sum()
-
-    def poly_feature(self, x):
-        user_e = self.projector(x) 
-        xx = self.bn(user_e).T @ self.bn(user_e)
-        poly = (self.a * xx + self.polyc) ** self.degree 
-        return poly.mean().log()
-
     def bt(self, x, y):
         user_e = self.projector(x) 
         item_e = self.projector(y) 
@@ -135,21 +128,15 @@ class BT4Rec(GeneralRecommender):
         off_diag = self.off_diagonal(c).pow_(2).sum().div(self.embedding_size)
         bt = on_diag + self.bt_coeff * off_diag
         return bt
-    
-    def mse(self, x, y):
-        x = self.projector(x) 
-        y = self.projector(y) 
-        return F.mse_loss(x, y)
-    
-    def std(self, x, y):
-        x = self.projector(x) 
-        y = self.projector(y)
-        x = x - x.mean(dim=0)
-        y = y - y.mean(dim=0)
-        std_x = torch.sqrt(x.var(dim=0) + 0.0001)
-        std_y = torch.sqrt(y.var(dim=0) + 0.0001)
-        std_loss = torch.mean(F.relu(1 - std_x)) / 2 + torch.mean(F.relu(1 - std_y)) / 2
-        return std_loss
+
+    def poly_feature(self, x):
+        user_e = self.projector(x) 
+        xx = self.bn(user_e).T @ self.bn(user_e)
+        poly = (self.a * xx + self.polyc) ** self.degree 
+        return poly.mean().log()
+
+    def loss_fn(self, p, z):  # cosine similarity
+        return - F.cosine_similarity(p, z.detach(), dim=-1).mean()
 
     def calculate_loss(self, interaction):
         if self.restore_user_e is not None or self.restore_item_e is not None:
@@ -157,23 +144,26 @@ class BT4Rec(GeneralRecommender):
 
         user = interaction[self.USER_ID]
         item = interaction[self.ITEM_ID]
+        user_e, item_e, embeddings_list, u_target, i_target = self.forward(user, item)
+        user_e_n, item_e_n = F.normalize(user_e, dim=-1), F.normalize(item_e, dim=-1)
+        user_e, item_e = self.predictor(user_e), self.predictor(item_e)
+        if self.all_bt_coeff == 0:
+            bt_loss = 0.0
+        else:
+            bt_loss = self.bt(user_e_n, item_e_n)
 
-        user_e, item_e = self.forward(user, item)
-        # repr_loss = self.mse(user_e, item_e)
-        std_loss =self.std(user_e, item_e)
-        # vicreg_loss = self.vicreg(user_e, item_e)
-        bt_loss = self.bt(user_e, item_e)
-        # align = self.alignment(user_e, item_e)
-        # uniform = (self.uniformity(user_e) + self.uniformity(item_e)) / 2
-        poly_loss = self.poly_feature(item_e) / 2 + self.poly_feature(user_e) / 2 
-        # return repr_loss + std_loss +
-        # self.gamma = min(self.gamma, (self.gamma * float(num_batch) / self.warm_up))
-        # print('self.warm_up: ', self.warm_up)
-        # print('self.num_batch: ', num_batch)
-        # print('self.gamma: ', self.gamma, '\n')
-        return bt_loss + self.gamma * poly_loss + std_loss
-        # return (1 - self.gamma) * bt_loss + self.gamma * poly_loss # vicreg_loss 
+        if self.poly_coeff == 0:
+            poly_loss = 0.0
+        else:
+            poly_loss = self.poly_feature(user_e_n) / 2 + self.poly_feature(item_e_n) / 2 
+        
+        if self.mom_coeff == 0:
+            mom_loss = 0.0
+        else:    
+            mom_loss = self.loss_fn(user_e, i_target) / 2 + self.loss_fn(item_e, u_target) / 2
 
+        return self.all_bt_coeff * bt_loss + poly_loss * self.poly_coeff + mom_loss * self.mom_coeff
+       
     def predict(self, interaction):
         user = interaction[self.USER_ID]
         item = interaction[self.ITEM_ID]
@@ -185,7 +175,7 @@ class BT4Rec(GeneralRecommender):
         user = interaction[self.USER_ID]
         if self.encoder_name == 'LightGCN':
             if self.restore_user_e is None or self.restore_item_e is None:
-                self.restore_user_e, self.restore_item_e = self.encoder.get_all_embeddings()
+                self.restore_user_e, self.restore_item_e, _ = self.encoder.get_all_embeddings()
             user_e = self.restore_user_e[user]
             all_item_e = self.restore_item_e
         else:
@@ -193,27 +183,6 @@ class BT4Rec(GeneralRecommender):
             all_item_e = self.encoder.item_embedding.weight
         score = torch.matmul(user_e, all_item_e.transpose(0, 1))
         return score.view(-1)
-
-    def vicreg(self, x, y):
-        x = self.projector(x) 
-        y = self.projector(y) 
-        repr_loss = F.mse_loss(x, y)
-        x = x - x.mean(dim=0)
-        y = y - y.mean(dim=0)
-        std_x = torch.sqrt(x.var(dim=0) + 0.0001)
-        std_y = torch.sqrt(y.var(dim=0) + 0.0001)
-        std_loss = torch.mean(F.relu(1 - std_x)) / 2 + torch.mean(F.relu(1 - std_y)) / 2
-        cov_x = (x.T @ x) / (self.batch_size - 1)
-        cov_y = (y.T @ y) / (self.batch_size - 1)
-        cov_loss = self.off_diagonal(cov_x).pow_(2).sum().div(self.embedding_size) + self.off_diagonal(cov_y).pow_(2).sum().div(self.embedding_size)
-        # loss = (
-        #     self.sim_coeff * repr_loss
-        #     + self.std_coeff * std_loss
-        #     + self.cov_coeff * cov_loss
-        # )
-        loss = 25 * repr_loss + 25 * std_loss + 1 * cov_loss
-        return loss
-
 
 class MFEncoder(nn.Module):
     def __init__(self, user_num, item_num, emb_size):
@@ -260,10 +229,10 @@ class LGCNEncoder(nn.Module):
         lightgcn_all_embeddings = torch.mean(lightgcn_all_embeddings, dim=1)
 
         user_all_embeddings, item_all_embeddings = torch.split(lightgcn_all_embeddings, [self.n_users, self.n_items])
-        return user_all_embeddings, item_all_embeddings
+        return user_all_embeddings, item_all_embeddings, lightgcn_all_embeddings
 
     def forward(self, user_id, item_id):
-        user_all_embeddings, item_all_embeddings = self.get_all_embeddings()
+        user_all_embeddings, item_all_embeddings, lightgcn_all_embeddings = self.get_all_embeddings()
         u_embed = user_all_embeddings[user_id]
         i_embed = item_all_embeddings[item_id]
-        return u_embed, i_embed
+        return u_embed, i_embed, lightgcn_all_embeddings
