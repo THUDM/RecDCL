@@ -1,7 +1,4 @@
 # -*- encoding: utf-8 -*-
-# @Time    :   2020/09/28
-# @Author  :   Kaiyuan Li
-# @email   :   tsotfsk@outlook.com
 
 """
 FISM

@@ -1,6 +1,3 @@
-# @Time   : 2020/10/19
-# @Author : Shanlei Mu
-# @Email  : slmu@ruc.edu.cn
 
 # yapf: disable
 

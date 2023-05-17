@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/12/31
-# @Author : Zihan Lin
-# @Email  : zhlin@ruc.edu.cn
 
 r"""
 ENMF

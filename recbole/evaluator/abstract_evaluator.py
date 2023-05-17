@@ -1,12 +1,4 @@
 # -*- encoding: utf-8 -*-
-# @Time    :   2020/10/21
-# @Author  :   Kaiyuan Li
-# @email   :   tsotfsk@outlook.com
-
-# UPDATE
-# @Time    :   2020/10/21, 2020/12/18
-# @Author  :   Kaiyuan Li, Zhichao Feng
-# @email   :   tsotfsk@outlook.com, fzcbupt@gmail.com
 
 """
 recbole.evaluator.abstract_evaluator

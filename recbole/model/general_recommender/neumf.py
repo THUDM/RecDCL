@@ -1,12 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/6/27
-# @Author : Shanlei Mu
-# @Email  : slmu@ruc.edu.cn
-
-# UPDATE:
-# @Time   : 2020/8/22,
-# @Author : Zihan Lin
-# @Email  : linzihan.super@foxmain.com
 
 r"""
 NeuMF

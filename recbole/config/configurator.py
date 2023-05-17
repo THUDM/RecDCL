@@ -1,11 +1,3 @@
-# @Time   : 2020/6/28
-# @Author : Zihan Lin
-# @Email  : linzihan.super@foxmail.com
-
-# UPDATE
-# @Time   : 2020/10/04, 2021/3/2, 2021/2/17
-# @Author : Shanlei Mu, Yupeng Hou, Jiawei Guan
-# @Email  : slmu@ruc.edu.cn, houyupeng@ruc.edu.cn, Guanjw@ruc.edu.cn
 
 """
 recbole.config.configurator

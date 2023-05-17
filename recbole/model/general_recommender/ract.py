@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2021/2/16
-# @Author : Haoran Cheng
-# @Email  : chenghaoran29@foxmail.com
 
 r"""
 RaCT

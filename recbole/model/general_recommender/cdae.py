@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/12/12
-# @Author : Xingyu Pan
-# @Email  : panxy@ruc.edu.cn
 
 r"""
 CDAE

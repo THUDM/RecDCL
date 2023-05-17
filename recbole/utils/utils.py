@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time   : 2020/7/17
-# @Author : Shanlei Mu
-# @Email  : slmu@ruc.edu.cn
-
-# UPDATE
-# @Time   : 2021/3/8
-# @Author : Jiawei Guan
-# @Email  : guanjw@ruc.edu.cn
-
 """
 recbole.utils.utils
 ################################

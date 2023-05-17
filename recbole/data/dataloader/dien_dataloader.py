@@ -1,11 +1,3 @@
-# @Time   : 2021/2/25
-# @Author : Zhichao Feng
-# @Email  : fzcbupt@gmail.com
-
-# UPDATE
-# @Time   : 2021/3/19
-# @Author : Zhichao Feng
-# @email  : fzcbupt@gmail.com
 
 """
 recbole.data.dataloader.dien_dataloader

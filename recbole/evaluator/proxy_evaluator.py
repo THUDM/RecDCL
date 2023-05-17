@@ -1,13 +1,4 @@
 # -*- encoding: utf-8 -*-
-# @Time    :   2020/12/9
-# @Author  :   Zhichao Feng
-# @email   :   fzcbupt@gmail.com
-
-# UPDATE
-# @Time    :   2020/12/9
-# @Author  :   Zhichao Feng
-# @email   :   fzcbupt@gmail.com
-
 """
 recbole.evaluator.proxy_evaluator
 #####################################

@@ -1,12 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/8/26
-# @Author : Gaole He
-# @Email  : hegaole@ruc.edu.cn
-
-# UPDATE:
-# @Time   : 2020/9/16
-# @Author : Shanlei Mu
-# @Email  : slmu@ruc.edu.cn
 
 r"""
 DGCF

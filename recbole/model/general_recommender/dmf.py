@@ -1,12 +1,4 @@
 # _*_ coding: utf-8 _*_
-# @Time : 2020/8/21
-# @Author : Kaizhou Zhang
-# @Email  : kaizhou361@163.com
-
-# UPDATE
-# @Time   : 2020/08/31  2020/09/18
-# @Author : Kaiyuan Li  Zihan Lin
-# @email  : tsotfsk@outlook.com  linzihan.super@foxmail.con
 
 r"""
 DMF

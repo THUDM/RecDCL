@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/8/11 9:57
-# @Author : Zihan Lin
-# @Email  : linzihan.super@foxmail.com
-# UPDATE
-# @Time   : 2020/11/9
-# @Author : Zihan Lin
-# @Email  : zhlin@ruc.edu.cn
 
 r"""
 Pop

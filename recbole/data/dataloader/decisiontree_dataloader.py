@@ -1,11 +1,3 @@
-# @Time   : 2020/11/19
-# @Author : Chen Yang
-# @Email  : 254170321@qq.com
-
-# UPDATE:
-# @Time   : 2020/11/19
-# @Author : Chen Yang
-# @Email  : 254170321@qq.com
 
 """
 recbole.data.dataloader.decisiontree_dataloader

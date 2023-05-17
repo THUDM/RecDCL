@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/10/6
-# @Author : Yingqian Min
-# @Email  : eliver_min@foxmail.com
 
 r"""
 ConvNCF

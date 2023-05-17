@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2021/1/14
-# @Author : Chengyuan Li
-# @Email  : 2017202049@ruc.edu.cn
 
 r"""
 NNCF

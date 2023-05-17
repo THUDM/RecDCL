@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/8/18
-# @Author : Zihan Lin
-# @Email  : linzihan.super@foxmail.com
 
 r"""
 ItemKNN

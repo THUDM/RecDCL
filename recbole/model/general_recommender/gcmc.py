@@ -1,12 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time   : 2020/9/1 14:00
-# @Author : Changxin Tian
-# @Email  : cx.tian@outlook.com
-
-# UPDATE
-# @Time   : 2020/10/1
-# @Author : Changxin Tian
-# @Email  : cx.tian@outlook.com
 
 r"""
 GCMC
