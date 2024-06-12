@@ -43,12 +43,11 @@ Overall top-20 performance comparison with representative models on four dataset
 If you find our work helpful, please kindly cite our paper:
 
 ```
-@misc{zhang2024recdcl,
-      title={RecDCL: Dual Contrastive Learning for Recommendation}, 
-      author={Dan Zhang and Yangliao Geng and Wenwen Gong and Zhongang Qi and Zhiyu Chen and Xing Tang and Ying Shan and Yuxiao Dong and Jie Tang},
-      year={2024},
-      eprint={2401.15635},
-      archivePrefix={arXiv},
-      primaryClass={cs.IR}
+@inproceedings{zhang2024recdcl,
+  title={RecDCL: Dual Contrastive Learning for Recommendation},
+  author={Zhang, Dan and Geng, Yangliao and Gong, Wenwen and Qi, Zhongang and Chen, Zhiyu and Tang, Xing and Shan, Ying and Dong, Yuxiao and Tang, Jie},
+  booktitle={Proceedings of the ACM on Web Conference 2024},
+  pages={3655--3666},
+  year={2024}
 }
 ```
