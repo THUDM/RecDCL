@@ -11,7 +11,7 @@ from recbole.model.general_recommender.itemknn import ItemKNN
 from recbole.model.general_recommender.lightgcn import LightGCN
 from recbole.model.general_recommender.lgcn import LGCN
 from recbole.model.general_recommender.directau import DirectAU
-from recbole.model.general_recommender.bt4rec import BT4Rec
+from recbole.model.general_recommender.recdcl import RecDCL
 from recbole.model.general_recommender.line import LINE
 from recbole.model.general_recommender.macridvae import MacridVAE
 from recbole.model.general_recommender.multidae import MultiDAE
